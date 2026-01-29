@@ -231,6 +231,7 @@
             <p style="font-size:1.2em; font-weight:bold;">도전할 과정을 선택하세요!</p>
             <button class="grade-btn" onclick="selectGrade(1)">1학년 수학용어 문제</button>
             <button class="grade-btn" onclick="selectGrade(2)">2학년 수학용어 문제</button>
+            <button class="grade-btn" onclick="selectGrade(3)">3학년 수학용어 문제</button>
         </div>
 
         <!-- 3. 퀴즈 영역 -->
@@ -333,7 +334,7 @@
             { term: "등식", def: "양쪽 값이 같은 수식" },
             { term: "방정식", def: "미지수가 포함된 등식" },
             { term: "미지수", def: "값을 구해야 할 문자" },
-            { term: "해", def: "방정식을 참이 되게 하는 값(근과 같은 말" },
+            { term: "해", def: "방정식을 참이 되게 하는 값(근과 같은 말)" },
             { term: "근", def: "방정식을 만족시키는 수 (해와 같은 말)" },
             { term: "항등식", def: "어떤 값을 넣어도 항상 참이 되는 식" },
             { term: "이항", def: "등식의 한쪽에 있는 항을 반대편으로 옮기는 것" },
@@ -423,8 +424,40 @@
             { term: "확률", def: "어떤 사건이 일어날 가능성" }
         ];
 
+        // 3학년 데이터 (New!)
+        const dataGrade3 = [
+            { term: "제곱근", def: "어떤 수를 두 번 곱해서 만든 수의 원래 수" },
+            { term: "근호", def: "제곱근을 나타낼 때 사용하는 기호" },
+            { term: "무리수", def: "분수로 나타낼 수 없는 소수" },
+            { term: "실수", def: "수직선 위의 모든 수 (유리수 + 무리수)" },
+            { term: "분모의 유리화", def: "분수의 분모에 있는 근호(루트)를 없애서 유리수로 고치는 과정" },
+            { term: "인수", def: "곱셈으로 표현된 식의 각 요소" },
+            { term: "인수분해", def: "다항식을 인수들의 곱으로 바꾸는 것" },
+            { term: "완전제곱식", def: "두 항의 합 또는 차 전체의 제곱으로 나타낼 수 있는 식" },
+            { term: "이차방정식", def: "차수가 2인 방정식" },
+            { term: "중근", def: "두 근이 같은 이차방정식의 해" },
+            { term: "근의 공식", def: "이차방정식의 해를 구하는 공식" },
+            { term: "이차함수", def: "차수가 2인 함수를 나타내는 식" },
+            { term: "포물선", def: "이차함수의 그래프 모양" },
+            { term: "꼭짓점", def: "포물선에서 가장 높은 점 또는 가장 낮은 점" },
+            { term: "삼각비", def: "직각삼각형의 각의 크기에 따른 변의 길이의 비율을 나타내는 값" },
+            { term: "사인", def: "직각삼각형에서 높이 ÷ 빗변" },
+            { term: "코사인", def: "직각삼각형에서 밑변 ÷ 빗변" },
+            { term: "탄젠트", def: "직각삼각형에서 높이 ÷ 밑변" },
+            { term: "원주각", def: "원 위의 점에서 보는 중심각의 절반인 각" },
+            { term: "대푯값", def: "자료 전체를 대표하는 값 (평균, 중앙값, 최빈값)" },
+            { term: "중앙값", def: "자료를 크기 순으로 나열했을 때 가운데에 위치한 값" },
+            { term: "최빈값", def: "자료에서 가장 자주 나타나는 값" },
+            { term: "산포도", def: "자료가 퍼져 있는 정도를 시각적으로 나타낸 그래프" },
+            { term: "편차", def: "각 자료값에서 평균을 뺀 값" },
+            { term: "분산", def: "편차를 제곱한 값들의 평균" },
+            { term: "표준편차", def: "분산의 양의 제곱근으로 나타낸 자료의 퍼짐 정도" },
+            { term: "산점도", def: "두 자료의 대응 관계를 점으로 나타낸 그래프" },
+            { term: "상관관계", def: "두 자료 사이의 관련성과 방향을 나타내는 관계" }
+        ];
+
         // 게임 상태 변수
-        let currentGrade = 0; // 1 or 2
+        let currentGrade = 0; // 1, 2, or 3
         let quizList = [];
         let currentIndex = 0;
         let wrongCount = 0;
@@ -459,9 +492,15 @@
         // 2. 학년 선택 -> 게임 시작
         function selectGrade(grade) {
             currentGrade = grade;
-            let dataSource = (grade === 1) ? dataGrade1 : dataGrade2;
+            let dataSource;
+            if (grade === 1) dataSource = dataGrade1;
+            else if (grade === 2) dataSource = dataGrade2;
+            else dataSource = dataGrade3;
 
+            // 데이터 섞기
             const shuffled = [...dataSource].sort(() => 0.5 - Math.random());
+            
+            // 20문제 추출 (데이터가 20개보다 적으면 전체 사용)
             if (shuffled.length < totalQuizCount) {
                 quizList = shuffled; 
             } else {
@@ -475,7 +514,7 @@
 
         // 3. 퀴즈 진행
         function showQuestion() {
-            if (currentIndex >= totalQuizCount) {
+            if (currentIndex >= quizList.length) { // length로 체크 (데이터가 20개 미만일 경우 대비)
                 endGame();
                 return;
             }
@@ -517,13 +556,10 @@
                 
                 if (wrongCount >= 2) {
                     // [중요] 2회 오답 발생 시 로직
-                    // 1. 정답 공개
                     msgBox.innerText = `땡! 정답은 '${quizList[currentIndex].term}' 입니다.`;
-                    
-                    // 2. 마스터 실패 확정
-                    isMasterRun = false; 
+                    isMasterRun = false; // 실패 확정
 
-                    // 3. 2초 뒤에 즉시 게임 종료 (다음 문제로 넘어가지 않음)
+                    // 2초 뒤에 즉시 게임 종료 (다음 문제로 넘어가지 않음)
                     setTimeout(() => {
                         endGame(); 
                     }, 2000);
@@ -575,10 +611,13 @@
                 finalTitle.innerText = "축하합니다!";
                 finalTitle.style.color = "#1565c0";
                 document.getElementById('success-content').classList.remove('hidden');
-                document.getElementById('fail-content').classList.add('hidden'); // 혹시 모를 숨김
+                document.getElementById('fail-content').classList.add('hidden');
                 
                 const badgeText = document.getElementById('master-badge-text');
-                badgeText.innerText = (currentGrade === 1) ? "중1 수학 용어 마스터" : "중2 수학 용어 마스터";
+                if (currentGrade === 1) badgeText.innerText = "중1 수학 용어 마스터";
+                else if (currentGrade === 2) badgeText.innerText = "중2 수학 용어 마스터";
+                else badgeText.innerText = "중3 수학 용어 마스터";
+                
             } else {
                 // 실패 UI
                 finalTitle.innerText = "도전 실패...";
@@ -601,13 +640,15 @@
                 return;
             }
 
-            const gradeText = currentGrade === 1 ? "1학년" : "2학년";
+            let gradeText = "";
+            if (currentGrade === 1) gradeText = "1학년";
+            else if (currentGrade === 2) gradeText = "2학년";
+            else gradeText = "3학년";
             
             let resultStatus = "";
             if (isMasterRun) {
                 resultStatus = "마스터 달성";
             } else {
-                // 몇 번 문제에서 탈락했는지 기록에 남김
                 resultStatus = `도전 실패 (${currentIndex + 1}번 문제 탈락)`;
             }
             
