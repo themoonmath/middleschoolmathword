@@ -1,1 +1,1 @@
-# middleschoolmathword
+# 중등수학용어챌린지
