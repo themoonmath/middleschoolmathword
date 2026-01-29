@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수학용어챌린지</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #e3f2fd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #1565c0;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background-color: #1976d2;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            font-weight: bold;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0d47a1;
+            transform: translateY(-2px);
+        }
+        
+        /* 실패 시 재도전 버튼 스타일 */
+        .retry-btn {
+            background-color: #d32f2f !important;
+            animation: pulse 2s infinite;
+        }
+        .retry-btn:hover {
+            background-color: #b71c1c !important;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #90caf9;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        #start-screen, #selection-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .grade-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            width: 100%;
+            background-color: #fff;
+            color: #1976d2;
+            border: 2px solid #1976d2;
+        }
+        .grade-btn:hover {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #42a5f5;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .progress-text {
+            text-align: right;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        .question-box {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f3e5f5;
+            border: 2px solid #ce93d8;
+            border-radius: 8px;
+            color: #4a148c;
+            font-weight: bold;
+            word-break: keep-all;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #result-msg {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 24px;
+            font-size: 1.1em;
+        }
+        .correct { color: #2e7d32; }
+        .wrong { color: #c62828; }
+        
+        /* 결과 배지 스타일 */
+        .master-badge {
+            background-color: #ffeb3b;
+            color: #f57f17;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: inline-block;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #fbc02d;
+        }
+        .fail-badge {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: inline-block;
+            margin: 20px 0;
+            border: 2px solid #ef5350;
+        }
+
+        /* 칭찬 모달 */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.6); 
+            animation: fadeIn 0.4s;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 30vh auto; 
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: popUp 0.3s;
+            border: 3px solid #42a5f5;
+        }
+        .modal-text {
+            font-size: 1.4em;
+            color: #1565c0;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .emoji { font-size: 3em; display: block; margin-bottom: 10px; }
+        
+        .bottom-info {
+            margin-top: 40px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .player-name {
+            font-size: 1.1em;
+            color: #1565c0;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .footer {
+            font-weight: bold;
+            color: #777;
+            font-size: 0.9em;
+        }
+        .hidden { display: none !important; }
+        
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes popUp { from {transform: scale(0.7);} to {transform: scale(1);} }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>수학용어챌린지</h1>
+
+        <!-- 1. 시작 화면 -->
+        <div id="start-screen">
+            <p>이름을 입력하고 도전하세요.</p>
+            <input type="text" id="username-input" placeholder="이름 입력" onkeyup="enterToNext()">
+            <button onclick="goToSelection()">다음 단계로</button>
+        </div>
+
+        <!-- 2. 학년 선택 화면 -->
+        <div id="selection-screen" class="hidden">
+            <p style="font-size:1.2em; font-weight:bold;">도전할 과정을 선택하세요!</p>
+            <button class="grade-btn" onclick="selectGrade(1)">1학년 수학용어 문제</button>
+            <button class="grade-btn" onclick="selectGrade(2)">2학년 수학용어 문제</button>
+        </div>
+
+        <!-- 3. 퀴즈 영역 -->
+        <div id="quiz-area" class="hidden">
+            <div class="progress-text"><span id="current-num">1</span> / 20</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="question-box" id="question-text">
+                문제 로딩 중...
+            </div>
+
+            <input type="text" id="answer-input" placeholder="정답 입력" onkeyup="enterKey()">
+            <br>
+            <button onclick="checkAnswer()">확인</button>
+            <div id="result-msg"></div>
+        </div>
+
+        <!-- 4. 최종 결과 화면 -->
+        <div id="finish-area" class="hidden">
+            <h2 id="final-title">결과 확인</h2>
+            
+            <!-- 성공 시 표시 -->
+            <div id="success-content" class="hidden">
+                <div id="master-badge-text" class="master-badge">수학 용어 마스터</div>
+                <p>축하합니다! 모든 테스트를 통과했습니다.</p>
+                <button onclick="location.reload()">처음으로 돌아가기</button>
+            </div>
+
+            <!-- 실패 시 표시 -->
+            <div id="fail-content" class="hidden">
+                <div class="fail-badge">도전 실패... 😭</div>
+                <p>오답 2회 누적으로 마스터 칭호 획득 실패!</p>
+                <p>다시 공부하고 도전해주세요.</p>
+                <button class="retry-btn" onclick="location.reload()">재도전하기</button>
+            </div>
+
+            <p id="saving-text" style="color:blue; font-size:0.8em; margin-top:20px;">(기록 저장 중...)</p>
+        </div>
+
+        <div class="bottom-info">
+            <div id="player-display" class="player-name hidden">도전자 : </div>
+            <div class="footer">
+                제작자 : 이천양정여자중학교 수학교사 문재윤
+            </div>
+        </div>
+    </div>
+
+    <!-- 칭찬 모달창 -->
+    <div id="praise-modal" class="modal">
+        <div class="modal-content">
+            <span class="emoji">🎉</span>
+            <div class="modal-text" id="praise-text">5문제 돌파!<br>아주 잘하고 있어요!</div>
+            <button onclick="closeModal()">계속하기</button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. 구글 앱스 스크립트 URL을 따옴표 안에 넣으세요!
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1EPOLPtCGiwC2-Qiu9JRjM8I-i3D-t14-27FkWnKywYqHLdlvLSE9pVSgvAgQenc/exec"; 
+        // ==========================================
+        
+        // 1학년 데이터
+        const dataGrade1 = [
+            { term: "소수", def: "1과 자기 자신만 약수로 가지는 수" },
+            { term: "합성수", def: "1과 자기 자신 이외의 약수를 가지는 수" },
+            { term: "거듭제곱", def: "같은 수를 여러 번 곱한 수" },
+            { term: "지수", def: "밑을 몇 번 곱했는지를 나타내는 수" },
+            { term: "밑", def: "거듭제곱에서 반복해 곱해지는 수" },
+            { term: "소인수", def: "어떤 수를 나누는 소수" },
+            { term: "서로소", def: "공약수가 1뿐인 두 수" },
+            { term: "양수", def: "0보다 큰 수" },
+            { term: "음수", def: "0보다 작은 수" },
+            { term: "양의 정수", def: "1, 2, 3처럼 0보다 큰 정수" },
+            { term: "음의 정수", def: "-1, -2처럼 0보다 작은 정수" },
+            { term: "정수", def: "양의 정수, 0, 음의 정수를 포함한 수" },
+            { term: "수직선", def: "수를 직선 위에 위치로 나타낸 것" },
+            { term: "양의 유리수", def: "0보다 큰 분수나 소수" },
+            { term: "음의 유리수", def: "0보다 작은 분수나 소수" },
+            { term: "유리수", def: "분수로 나타낼 수 있는 수" },
+            { term: "절댓값", def: "수의 크기를 나타내는 0에서의 거리" },
+            { term: "교환법칙", def: "덧셈과 곱셈에서 순서를 바꿔도 결과가 같은 성질" },
+            { term: "결합법칙", def: "덧셈과 곱셈에서 괄호의 위치를 바꿔 계산해도 같은 성질" },
+            { term: "분배법칙", def: "곱셈이 덧셈이나 뺄셈 안으로 퍼지는 성질" },
+            { term: "역수", def: "곱했을 때 1이 되는 두 수 중 하나" },
+            { term: "양의 부호", def: "양수를 나타내는 기호" },
+            { term: "음의 부호", def: "음수를 나타내는 기호" },
+            { term: "대입", def: "미지수 자리에 값을 넣는 것" },
+            { term: "항", def: "식을 이루는 더하거나 뺀 각각의 부분" },
+            { term: "다항식", def: "하나 이상의 항이 더해진 식" },
+            { term: "단항식", def: "항이 하나만 있는 식" },
+            { term: "상수항", def: "문자가 없는 항" },
+            { term: "계수", def: "문자 앞에 곱해진 수" },
+            { term: "차수", def: "항에서 문자의 지수의 합" },
+            { term: "일차식", def: "차수가 1인 식" },
+            { term: "동류항", def: "문자와 차수가 같은 항" },
+            { term: "등식", def: "양쪽 값이 같은 수식" },
+            { term: "방정식", def: "미지수가 포함된 등식" },
+            { term: "미지수", def: "값을 구해야 할 문자" },
+            { term: "해", def: "방정식을 참이 되게 하는 값" },
+            { term: "근", def: "방정식을 만족시키는 수 (해와 같은 말)" },
+            { term: "항등식", def: "어떤 값을 넣어도 항상 참이 되는 식" },
+            { term: "이항", def: "등식의 한쪽에 있는 항을 반대편으로 옮기는 것" },
+            { term: "일차방정식", def: "미지수의 차수가 1인 방정식" },
+            { term: "변수", def: "값이 변할 수 있는 문자" },
+            { term: "좌표", def: "위치를 수로 나타낸 값" },
+            { term: "순서쌍", def: "좌표에서 (가로, 세로)처럼 순서를 정해 표현한 두 수" },
+            { term: "x좌표", def: "원점으로부터 오른쪽(또는 왼쪽)으로 얼마나 움직였는지를 나타내는 수" },
+            { term: "y좌표", def: "원점으로부터 위쪽(또는 아래쪽)으로 얼마나 움직였는지를 나타내는 수" },
+            { term: "원점", def: "x축과 y축이 만나는 출발점 (0, 0)" },
+            { term: "좌표축", def: "점의 위치를 정할 때 쓰는 두 개의 기준선" },
+            { term: "x축", def: "좌표평면에서 가로 방향의 수직선, 왼쪽↔오른쪽 방향" },
+            { term: "y축", def: "좌표평면에서 세로 방향의 수직선, 아래↕위쪽 방향" },
+            { term: "좌표평면", def: "좌표평면에서 x축과 y축으로 나뉜 평면 위의 공간" },
+            { term: "제1사분면", def: "좌표평면에서 x와 y가 모두 양수인 영역 (오른쪽 위)" },
+            { term: "제2사분면", def: "좌표평면에서 x는 음수, y는 양수인 영역 (왼쪽 위)" },
+            { term: "제3사분면", def: "좌표평면에서 x와 y가 모두 음수인 영역 (왼쪽 아래)" },
+            { term: "제4사분면", def: "좌표평면에서 x는 양수, y는 음수인 영역 (오른쪽 아래)" },
+            { term: "그래프", def: "수나 식의 관계를 그림으로 나타낸 선 또는 점" },
+            { term: "정비례", def: "x와 y가 같이 커지거나 같이 작아지는 일정한 비율의 관계" },
+            { term: "반비례", def: "x가 커지면 y가 작아지고, 곱은 항상 같은 관계" },
+            { term: "교점", def: "두 도형이 만나는 점" },
+            { term: "교선", def: "두 평면이 만나는 선" },
+            { term: "중점", def: "선분의 정중앙에 위치한 점" },
+            { term: "수직이등분선", def: "선분의 중점을 수직으로 지나는 선" },
+            { term: "꼬인 위치", def: "두 직선이 만나지 않고 서로 다른 평면에 있는 상태" },
+            { term: "교각", def: "두 직선이 만날 때 생기는 네 개의 각" },
+            { term: "맞꼭지각", def: "두 직선이 교차할 때 마주 보는 각" },
+            { term: "엇각", def: "평행선과 가로지르는 직선이 만들며 서로 마주보지 않는 위치의 각" },
+            { term: "동위각", def: "평행선에서 같은 위치에 있는 각" },
+            { term: "평각", def: "반듯하게 펼쳐진 180도의 각" },
+            { term: "직교", def: "두 직선이 서로 수직으로 만나는 것" },
+            { term: "수선의 발", def: "점에서 수직으로 내린 수선이 닿는 지점" },
+            { term: "작도", def: "눈금 없는 자와 컴퍼스를 이용해 도형을 그리는 방법" },
+            { term: "내각", def: "다각형 안쪽에 있는 각" },
+            { term: "외각", def: "다각형의 한 변을 연장했을 때 생기는 바깥쪽 각" },
+            { term: "부채꼴", def: "원에서 두 반지름과 호로 둘러싸인 부분" },
+            { term: "중심각", def: "원의 중심에서 시작해 만들어지는 각" },
+            { term: "호", def: "원 위의 두 점을 잇는 곡선 부분" },
+            { term: "현", def: "원 위 두 점을 곧게 이은 선분" },
+            { term: "활꼴", def: "원의 일부 곡선과 그것을 잇는 현으로 이루어진 부분" },
+            { term: "할선", def: "원과 한 점 또는 두 점에서 만나는 직선" },
+            { term: "다면체", def: "여러 개의 평면으로 둘러싸인 입체도형" },
+            { term: "각뿔대", def: "위쪽이 잘린 각뿔 모양의 입체도형" },
+            { term: "정다면체", def: "모든 면이 같은 정다각형으로 이루어진 입체도형" },
+            { term: "회전체", def: "평면 도형을 한 축을 중심으로 회전해 생긴 입체도형" },
+            { term: "회전축", def: "회전체를 만들 때 기준이 되는 축" },
+            { term: "원뿔대", def: "원뿔의 꼭짓점을 자른 입체도형" },
+            { term: "변량", def: "자료를 구성하는 각각의 수치" },
+            { term: "줄기와 잎 그림", def: "수를 줄기와 잎으로 나누어 나타낸 그래프" },
+            { term: "계급", def: "자료를 일정한 간격으로 나눈 구간" },
+            { term: "계급의 크기", def: "계급의 상한과 하한의 차이" },
+            { term: "도수", def: "각 계급에 속하는 자료의 개수" },
+            { term: "도수분포표", def: "계급별 도수를 정리한 표" },
+            { term: "히스토그램", def: "도수분포를 막대그래프로 나타낸 것" },
+            { term: "도수분포다각형", def: "히스토그램의 각 직사각형 윗변의 중점과 양 끝의 도수가 0인 계급의 중점을 선분으로 연결한 그래프" },
+            { term: "상대도수", def: "전체에 대한 각 계급의 도수의 비율" }
+        ];
+
+        // 2학년 데이터
+        const dataGrade2 = [
+            { term: "유한소수", def: "소수점 아래 자릿수가 끝나는 소수" },
+            { term: "무한소수", def: "소수점 아래가 끝없이 계속 되는 소수" },
+            { term: "순환소수", def: "소수점 아래 일정한 숫자가 반복되는 소수" },
+            { term: "순환마디", def: "순환소수에서 반복되는 숫자 부분" },
+            { term: "일차부등식", def: "미지수의 지수가 1인 부등식" },
+            { term: "연립방정식", def: "여러 개의 방정식을 함께 풀어 미지수 값을 구하는 식" },
+            { term: "일차함수", def: "그래프가 직선인 차수가 1인 함수" },
+            { term: "기울기", def: "직선의 기울어진 정도를 수로 나타낸 값" },
+            { term: "x절편", def: "일차함수의 그래프가 x축과 만나는 점의 x좌표" },
+            { term: "y절편", def: "일차함수의 그래프가 y축과 만나는 점의 y좌표" },
+            { term: "평행이동", def: "도형이 위아래, 또는 좌우로 이동하는 것" },
+            { term: "직선의 방정식", def: "직선 위의 모든 점을 만족시키는 방정식" },
+            { term: "접선", def: "곡선과 한 점에서 접하는 직선" },
+            { term: "접점", def: "접선과 곡선이 만나는 한 점" },
+            { term: "외심", def: "삼각형의 세 변을 수직이등분선이 만나는 점" },
+            { term: "외접", def: "도형 바깥에서 둘러싸며 접하는 상태" },
+            { term: "외접원", def: "삼각형의 꼭짓점을 모두 지나는 원" },
+            { term: "내심", def: "삼각형의 세 각의 이등분선이 만나는 점" },
+            { term: "내접", def: "도형 안쪽에 맞닿으며 들어 있는 상태" },
+            { term: "내접원", def: "삼각형의 각 변에 접하는 원" },
+            { term: "중선", def: "삼각형에서 꼭짓점과 그 반대편 변의(대변) 의 중점을 잇는 선" },
+            { term: "무게중심", def: "삼각형의 세 중선이 만나는 점" },
+            { term: "닮음", def: "모양이 같고 크기만 다른 도형 관계" },
+            { term: "닮음비", def: "닮은 도형에서 대응하는 길이의 비율" },
+            { term: "피타고라스 정리", def: "직각삼각형에서 빗변의 제곱이 다른 두 변의 제곱의 합과 같다는 정리" },
+            { term: "확률", def: "어떤 사건이 일어날 가능성" }
+        ];
+
+        // 게임 상태 변수
+        let currentGrade = 0; // 1 or 2
+        let quizList = [];
+        let currentIndex = 0;
+        let wrongCount = 0;
+        let totalWrongAttempts = 0;
+        let currentPlayerName = "";
+        let isMasterRun = true; // 마스터 도전 자격 (2회 오답시 false로 변경)
+        const totalQuizCount = 20;
+
+        // 1. 이름 입력 -> 학년 선택 화면
+        function goToSelection() {
+            const nameInput = document.getElementById('username-input');
+            currentPlayerName = nameInput.value.trim();
+
+            if (!currentPlayerName) {
+                alert('이름을 입력해주세요!');
+                return;
+            }
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('selection-screen').classList.remove('hidden');
+            const playerDisplay = document.getElementById('player-display');
+            playerDisplay.innerText = "도전자 : " + currentPlayerName;
+            playerDisplay.classList.remove('hidden');
+        }
+
+        function enterToNext() {
+            if (window.event.keyCode == 13) {
+                goToSelection();
+            }
+        }
+
+        // 2. 학년 선택 -> 게임 시작
+        function selectGrade(grade) {
+            currentGrade = grade;
+            let dataSource = (grade === 1) ? dataGrade1 : dataGrade2;
+
+            const shuffled = [...dataSource].sort(() => 0.5 - Math.random());
+            if (shuffled.length < totalQuizCount) {
+                quizList = shuffled; 
+            } else {
+                quizList = shuffled.slice(0, totalQuizCount);
+            }
+            
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            showQuestion();
+        }
+
+        // 3. 퀴즈 진행
+        function showQuestion() {
+            if (currentIndex >= totalQuizCount) {
+                endGame();
+                return;
+            }
+
+            wrongCount = 0;
+            document.getElementById('answer-input').value = '';
+            document.getElementById('result-msg').innerHTML = '';
+            document.getElementById('answer-input').focus();
+            
+            document.getElementById('current-num').innerText = currentIndex + 1;
+            const progressPercent = ((currentIndex) / totalQuizCount) * 100;
+            document.getElementById('progress-bar').style.width = progressPercent + "%";
+            document.getElementById('question-text').innerText = quizList[currentIndex].def;
+        }
+
+        function checkAnswer() {
+            const userInput = document.getElementById('answer-input').value.trim().replace(/\s+/g, '');
+            const correctAnswer = quizList[currentIndex].term.replace(/\s+/g, '');
+            const msgBox = document.getElementById('result-msg');
+
+            if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
+                msgBox.className = 'correct';
+                msgBox.innerText = '정답입니다.';
+                
+                setTimeout(() => {
+                    currentIndex++;
+                    // 마스터 도전 중일 때만 칭찬 팝업 띄움
+                    if (isMasterRun && currentIndex > 0 && currentIndex % 5 === 0 && currentIndex < totalQuizCount) {
+                        showPraiseModal();
+                    } else {
+                        showQuestion();
+                    }
+                }, 1000);
+
+            } else {
+                wrongCount++;
+                totalWrongAttempts++;
+                msgBox.className = 'wrong';
+                
+                if (wrongCount >= 2) {
+                    // 오답 2회 -> 정답 공개 -> 마스터 실패 확정
+                    msgBox.innerText = `정답은 '${quizList[currentIndex].term}' 입니다.`;
+                    isMasterRun = false; 
+                    
+                    setTimeout(() => {
+                        currentIndex++;
+                        showQuestion(); // 다음 문제로 계속 진행
+                    }, 2000);
+
+                } else {
+                    msgBox.innerText = '다시 한 번 생각해보세요.';
+                    document.getElementById('answer-input').select();
+                }
+            }
+        }
+
+        // 칭찬 모달
+        function showPraiseModal() {
+            const modal = document.getElementById('praise-modal');
+            const praiseText = document.getElementById('praise-text');
+            
+            if (currentIndex === 5) {
+                praiseText.innerHTML = "5문제 돌파!<br>시작이 아주 좋아요!";
+            } else if (currentIndex === 10) {
+                praiseText.innerHTML = "10문제 돌파!<br>절반이나 왔어요!";
+            } else if (currentIndex === 15) {
+                praiseText.innerHTML = "15문제 돌파!<br>조금만 더 힘내세요!";
+            }
+            
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById('praise-modal').style.display = "none";
+            showQuestion();
+        }
+
+        function enterKey() {
+            if (window.event.keyCode == 13) {
+                checkAnswer();
+            }
+        }
+
+        // 4. 게임 종료
+        function endGame() {
+            document.getElementById('quiz-area').classList.add('hidden');
+            document.getElementById('finish-area').classList.remove('hidden');
+            document.getElementById('progress-bar').style.width = "100%";
+
+            const finalTitle = document.getElementById('final-title');
+            
+            if (isMasterRun) {
+                // 성공 UI
+                finalTitle.innerText = "축하합니다!";
+                finalTitle.style.color = "#1565c0";
+                document.getElementById('success-content').classList.remove('hidden');
+                
+                const badgeText = document.getElementById('master-badge-text');
+                badgeText.innerText = (currentGrade === 1) ? "중1 수학 용어 마스터" : "중2 수학 용어 마스터";
+            } else {
+                // 실패 UI
+                finalTitle.innerText = "아쉽습니다...";
+                finalTitle.style.color = "#c62828";
+                document.getElementById('fail-content').classList.remove('hidden');
+            }
+
+            // 구글 시트로 기록 전송
+            sendDataToSheet();
+        }
+
+        function sendDataToSheet() {
+            if (SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL") {
+                document.getElementById('saving-text').innerText = "스크립트 URL이 설정되지 않았습니다.";
+                return;
+            }
+
+            // 학년 정보 문자열 생성
+            const gradeText = currentGrade === 1 ? "1학년" : "2학년";
+            
+            let resultStatus = "";
+            if (isMasterRun) {
+                resultStatus = "마스터 달성";
+            } else {
+                resultStatus = "도전 실패 (정답 공개됨)";
+            }
+            
+            // 결과 문자열 (오답 횟수 포함)
+            const finalResult = `${resultStatus} (총 오답 ${totalWrongAttempts}회)`;
+
+            // URL에 grade 파라미터 추가
+            const url = `${SCRIPT_URL}?name=${encodeURIComponent(currentPlayerName)}&grade=${encodeURIComponent(gradeText)}&result=${encodeURIComponent(finalResult)}`;
+
+            fetch(url)
+                .then(response => {
+                    document.getElementById('saving-text').innerText = "(기록 저장 완료!)";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('saving-text').innerText = "(저장 실패)";
+                });
+        }
+    </script>
+</body>
+</html>
