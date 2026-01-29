@@ -52,6 +52,9 @@
         .retry-btn {
             background-color: #d32f2f !important;
             animation: pulse 2s infinite;
+            font-size: 1.2em;
+            padding: 15px 30px;
+            margin-top: 20px;
         }
         .retry-btn:hover {
             background-color: #b71c1c !important;
@@ -253,7 +256,7 @@
             
             <!-- 성공 시 표시 -->
             <div id="success-content" class="hidden">
-                <div id="master-badge-text" class="master-badge">🏆수학 용어 마스터</div>
+                <div class="master-badge">🏆 <span id="master-badge-text">수학 용어 마스터</span></div>
                 <p>축하합니다! 모든 테스트를 통과했습니다.</p>
                 <button onclick="location.reload()">처음으로 돌아가기</button>
             </div>
@@ -261,8 +264,8 @@
             <!-- 실패 시 표시 -->
             <div id="fail-content" class="hidden">
                 <div class="fail-badge">도전 실패... 😭</div>
-                <p>오답 2회 누적으로 마스터 칭호 획득 실패!</p>
-                <p>다시 공부하고 도전해주세요.</p>
+                <p id="fail-reason-text" style="font-weight:bold; color:#555; margin-top:10px;">오답 2회 누적!</p>
+                <p>처음부터 다시 도전해주세요.</p>
                 <button class="retry-btn" onclick="location.reload()">재도전하기</button>
             </div>
 
@@ -330,7 +333,7 @@
             { term: "등식", def: "양쪽 값이 같은 수식" },
             { term: "방정식", def: "미지수가 포함된 등식" },
             { term: "미지수", def: "값을 구해야 할 문자" },
-            { term: "해", def: "방정식을 참이 되게 하는 값" },
+            { term: "해", def: "방정식을 참이 되게 하는 값(근과 같은 말" },
             { term: "근", def: "방정식을 만족시키는 수 (해와 같은 말)" },
             { term: "항등식", def: "어떤 값을 넣어도 항상 참이 되는 식" },
             { term: "이항", def: "등식의 한쪽에 있는 항을 반대편으로 옮기는 것" },
@@ -342,9 +345,9 @@
             { term: "y좌표", def: "원점으로부터 위쪽(또는 아래쪽)으로 얼마나 움직였는지를 나타내는 수" },
             { term: "원점", def: "x축과 y축이 만나는 출발점 (0, 0)" },
             { term: "좌표축", def: "점의 위치를 정할 때 쓰는 두 개의 기준선" },
-            { term: "x축", def: "좌표평면에서 가로 방향의 수직선, 왼쪽↔오른쪽 방향" },
-            { term: "y축", def: "좌표평면에서 세로 방향의 수직선, 아래↕위쪽 방향" },
-            { term: "좌표평면", def: "좌표평면에서 x축과 y축으로 나뉜 평면 위의 공간" },
+            { term: "x축", def: "가로 방향의 수직선, 왼쪽↔오른쪽 방향" },
+            { term: "y축", def: "세로 방향의 수직선, 아래↕위쪽 방향" },
+            { term: "좌표평면", def: "x축과 y축으로 나뉜 평면 위의 공간" },
             { term: "제1사분면", def: "좌표평면에서 x와 y가 모두 양수인 영역 (오른쪽 위)" },
             { term: "제2사분면", def: "좌표평면에서 x는 음수, y는 양수인 영역 (왼쪽 위)" },
             { term: "제3사분면", def: "좌표평면에서 x와 y가 모두 음수인 영역 (왼쪽 아래)" },
@@ -427,7 +430,7 @@
         let wrongCount = 0;
         let totalWrongAttempts = 0;
         let currentPlayerName = "";
-        let isMasterRun = true; // 마스터 도전 자격 (2회 오답시 false로 변경)
+        let isMasterRun = true; // 마스터 도전 자격
         const totalQuizCount = 20;
 
         // 1. 이름 입력 -> 학년 선택 화면
@@ -513,13 +516,16 @@
                 msgBox.className = 'wrong';
                 
                 if (wrongCount >= 2) {
-                    // 오답 2회 -> 정답 공개 -> 마스터 실패 확정
-                    msgBox.innerText = `정답은 '${quizList[currentIndex].term}' 입니다.`;
-                    isMasterRun = false; 
+                    // [중요] 2회 오답 발생 시 로직
+                    // 1. 정답 공개
+                    msgBox.innerText = `땡! 정답은 '${quizList[currentIndex].term}' 입니다.`;
                     
+                    // 2. 마스터 실패 확정
+                    isMasterRun = false; 
+
+                    // 3. 2초 뒤에 즉시 게임 종료 (다음 문제로 넘어가지 않음)
                     setTimeout(() => {
-                        currentIndex++;
-                        showQuestion(); // 다음 문제로 계속 진행
+                        endGame(); 
                     }, 2000);
 
                 } else {
@@ -569,14 +575,20 @@
                 finalTitle.innerText = "축하합니다!";
                 finalTitle.style.color = "#1565c0";
                 document.getElementById('success-content').classList.remove('hidden');
+                document.getElementById('fail-content').classList.add('hidden'); // 혹시 모를 숨김
                 
                 const badgeText = document.getElementById('master-badge-text');
                 badgeText.innerText = (currentGrade === 1) ? "중1 수학 용어 마스터" : "중2 수학 용어 마스터";
             } else {
                 // 실패 UI
-                finalTitle.innerText = "아쉽습니다...";
+                finalTitle.innerText = "도전 실패...";
                 finalTitle.style.color = "#c62828";
                 document.getElementById('fail-content').classList.remove('hidden');
+                document.getElementById('success-content').classList.add('hidden');
+                
+                // 어느 문제에서 떨어졌는지 표시
+                const failReason = document.getElementById('fail-reason-text');
+                failReason.innerText = `${currentIndex + 1}번 문제에서 오답 2회로 탈락!`;
             }
 
             // 구글 시트로 기록 전송
@@ -589,18 +601,18 @@
                 return;
             }
 
-            // 학년 정보 문자열 생성
             const gradeText = currentGrade === 1 ? "1학년" : "2학년";
             
             let resultStatus = "";
             if (isMasterRun) {
                 resultStatus = "마스터 달성";
             } else {
-                resultStatus = "도전 실패 (정답 공개됨)";
+                // 몇 번 문제에서 탈락했는지 기록에 남김
+                resultStatus = `도전 실패 (${currentIndex + 1}번 문제 탈락)`;
             }
             
-            // 결과 문자열 (오답 횟수 포함)
-            const finalResult = `${resultStatus} (총 오답 ${totalWrongAttempts}회)`;
+            // 결과 문자열
+            const finalResult = `${resultStatus}`;
 
             // URL에 grade 파라미터 추가
             const url = `${SCRIPT_URL}?name=${encodeURIComponent(currentPlayerName)}&grade=${encodeURIComponent(gradeText)}&result=${encodeURIComponent(finalResult)}`;
@@ -617,4 +629,3 @@
     </script>
 </body>
 </html>
-
