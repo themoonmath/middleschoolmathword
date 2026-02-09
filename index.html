@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>수학용어챌린지</title>
+    <title>중등수학용어챌린지</title>
     <style>
         body {
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
@@ -47,19 +47,21 @@
             background-color: #0d47a1;
             transform: translateY(-2px);
         }
-        
-        /* 실패 시 재도전 버튼 스타일 */
-        .retry-btn {
-            background-color: #d32f2f !important;
-            animation: pulse 2s infinite;
-            font-size: 1.2em;
-            padding: 15px 30px;
-            margin-top: 20px;
-        }
-        .retry-btn:hover {
-            background-color: #b71c1c !important;
-        }
 
+        /* 처음으로 버튼 스타일 */
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            background-color: #90caf9;
+            color: #1565c0;
+        }
+        .home-btn:hover {
+            background-color: #64b5f6;
+        }
+        
         input[type="text"] {
             width: 70%;
             padding: 12px;
@@ -90,25 +92,41 @@
             color: #0d47a1;
         }
         
-        .progress-container {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            overflow: hidden;
+        /* 진행률 관련 스타일 */
+        .quiz-header-info {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            background: #f1f8e9;
+            padding: 5px;
+            border-radius: 5px;
+            display: inline-block;
         }
-        .progress-bar {
-            height: 20px;
-            background-color: #42a5f5;
-            width: 0%;
-            transition: width 0.3s;
+        .progress-info {
+            width: 100%;
+            margin-bottom: 20px;
         }
         .progress-text {
             text-align: right;
             font-size: 0.9em;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             color: #555;
+            font-weight: bold;
         }
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #42a5f5;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
         .question-box {
             font-size: 1.2em;
             margin: 20px 0;
@@ -130,11 +148,12 @@
             font-weight: bold;
             min-height: 24px;
             font-size: 1.1em;
+            white-space: pre-line;
+            line-height: 1.5;
         }
         .correct { color: #2e7d32; }
         .wrong { color: #c62828; }
         
-        /* 결과 배지 스타일 */
         .master-badge {
             background-color: #ffeb3b;
             color: #f57f17;
@@ -146,20 +165,21 @@
             margin: 20px 0;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             border: 2px solid #fbc02d;
+            max-width: 90%;
+            word-break: keep-all;
         }
-        .fail-badge {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.5em;
-            font-weight: bold;
-            display: inline-block;
+        
+        .score-board {
+            font-size: 1.3em;
             margin: 20px 0;
-            border: 2px solid #ef5350;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 10px;
+            color: #0d47a1;
+            font-weight: bold;
         }
 
-        /* 칭찬 모달 */
+        /* 모달 */
         .modal {
             display: none; 
             position: fixed; 
@@ -206,27 +226,33 @@
             font-weight: bold;
             color: #777;
             font-size: 0.9em;
+            line-height: 1.6;
+        }
+        .warning-text {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+            display: block;
         }
         .hidden { display: none !important; }
         
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
         @keyframes popUp { from {transform: scale(0.7);} to {transform: scale(1);} }
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.05);} 100% {transform: scale(1);} }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>수학용어챌린지</h1>
+        <button id="home-btn" class="home-btn hidden" onclick="location.reload()">🏠 처음으로</button>
 
-        <!-- 1. 시작 화면 -->
+        <h1>중등수학용어챌린지</h1>
+
         <div id="start-screen">
-            <p>이름을 입력하고 도전하세요.</p>
-            <input type="text" id="username-input" placeholder="이름 입력" onkeyup="enterToNext()">
+            <p>도전자 ID를 입력하고 도전하세요.</p>
+            <input type="text" id="username-input" placeholder="도전자 ID 입력" onkeyup="enterToNext()">
             <button onclick="goToSelection()">다음 단계로</button>
         </div>
 
-        <!-- 2. 학년 선택 화면 -->
         <div id="selection-screen" class="hidden">
             <p style="font-size:1.2em; font-weight:bold;">도전할 과정을 선택하세요!</p>
             <button class="grade-btn" onclick="selectGrade(1)">1학년 수학용어 문제</button>
@@ -234,11 +260,14 @@
             <button class="grade-btn" onclick="selectGrade(3)">3학년 수학용어 문제</button>
         </div>
 
-        <!-- 3. 퀴즈 영역 -->
         <div id="quiz-area" class="hidden">
-            <div class="progress-text"><span id="current-num">1</span> / 20</div>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
+            <div id="quiz-info-text" class="quiz-header-info"></div>
+            
+            <div class="progress-info">
+                <div class="progress-text">진행률: <span id="current-num">1</span> / <span id="total-num">20</span></div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
             </div>
 
             <div class="question-box" id="question-text">
@@ -251,37 +280,36 @@
             <div id="result-msg"></div>
         </div>
 
-        <!-- 4. 최종 결과 화면 -->
         <div id="finish-area" class="hidden">
-            <h2 id="final-title">결과 확인</h2>
+            <h2 id="final-title">챌린지 종료!</h2>
             
-            <!-- 성공 시 표시 -->
-            <div id="success-content" class="hidden">
+            <div class="score-board">
+                최종 결과<br>
+                <span id="final-score" style="font-size:1.5em; color:#1565c0;"></span>
+            </div>
+
+            <div id="badge-area" class="hidden">
                 <div class="master-badge">🏆 <span id="master-badge-text">수학 용어 마스터</span></div>
-                <p>축하합니다! 모든 테스트를 통과했습니다.</p>
-                <button onclick="location.reload()">처음으로 돌아가기</button>
+                <p style="margin-top:15px; font-weight:bold; color:#f57f17;">완벽합니다! 20문제를 모두 스스로 맞혔습니다!</p>
             </div>
+            
+            <p id="review-msg" class="hidden" style="color:#555; margin-top:15px;">
+                오답이 있었습니다. 다음엔 마스터에 도전해보세요!
+            </p>
 
-            <!-- 실패 시 표시 -->
-            <div id="fail-content" class="hidden">
-                <div class="fail-badge">도전 실패... 😭</div>
-                <p id="fail-reason-text" style="font-weight:bold; color:#555; margin-top:10px;">오답 2회 누적!</p>
-                <p>처음부터 다시 도전해주세요.</p>
-                <button class="retry-btn" onclick="location.reload()">재도전하기</button>
-            </div>
-
+            <button onclick="location.reload()">처음으로 돌아가기</button>
             <p id="saving-text" style="color:blue; font-size:0.8em; margin-top:20px;">(기록 저장 중...)</p>
         </div>
 
         <div class="bottom-info">
-            <div id="player-display" class="player-name hidden">도전자 : </div>
+            <div id="player-display" class="player-name hidden">도전자 ID : </div>
             <div class="footer">
-                제작자 : 이천양정여자중학교 수학교사 문재윤
+                제작자 : 연구부장의 수학노트
+                <span class="warning-text">본 저작물의 무단 복제 및 배포를 금합니다.</span>
             </div>
         </div>
     </div>
 
-    <!-- 칭찬 모달창 -->
     <div id="praise-modal" class="modal">
         <div class="modal-content">
             <span class="emoji">🎉</span>
@@ -424,7 +452,7 @@
             { term: "확률", def: "어떤 사건이 일어날 가능성" }
         ];
 
-        // 3학년 데이터 (New!)
+        // 3학년 데이터
         const dataGrade3 = [
             { term: "제곱근", def: "어떤 수를 두 번 곱해서 만든 수의 원래 수" },
             { term: "근호", def: "제곱근을 나타낼 때 사용하는 기호" },
@@ -460,11 +488,10 @@
         let currentGrade = 0; // 1, 2, or 3
         let quizList = [];
         let currentIndex = 0;
-        let wrongCount = 0;
-        let totalWrongAttempts = 0;
+        let wrongCount = 0; // 현재 문제의 오답 횟수
+        let correctAnswersCount = 0; // 점수를 얻은(2번 내에 맞힌) 문제 수
         let currentPlayerName = "";
-        let isMasterRun = true; // 마스터 도전 자격
-        const totalQuizCount = 20;
+        let totalQuizCount = 0; // 이번 게임의 문제 수 (20개)
 
         // 1. 이름 입력 -> 학년 선택 화면
         function goToSelection() {
@@ -472,14 +499,14 @@
             currentPlayerName = nameInput.value.trim();
 
             if (!currentPlayerName) {
-                alert('이름을 입력해주세요!');
+                alert('도전자 ID를 입력해주세요!');
                 return;
             }
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('selection-screen').classList.remove('hidden');
             const playerDisplay = document.getElementById('player-display');
-            playerDisplay.innerText = "도전자 : " + currentPlayerName;
+            playerDisplay.innerText = "도전자 ID : " + currentPlayerName;
             playerDisplay.classList.remove('hidden');
         }
 
@@ -489,7 +516,7 @@
             }
         }
 
-        // 2. 학년 선택 -> 게임 시작
+        // 2. 학년 선택 -> 게임 시작 (20문제 랜덤 추출 로직)
         function selectGrade(grade) {
             currentGrade = grade;
             let dataSource;
@@ -500,21 +527,31 @@
             // 데이터 섞기
             const shuffled = [...dataSource].sort(() => 0.5 - Math.random());
             
-            // 20문제 추출 (데이터가 20개보다 적으면 전체 사용)
-            if (shuffled.length < totalQuizCount) {
-                quizList = shuffled; 
-            } else {
-                quizList = shuffled.slice(0, totalQuizCount);
-            }
+            // 전체 문제 갯수 저장
+            const originalTotal = dataSource.length;
+
+            // [수정] 20문제만 자르기 (데이터가 20개 미만이면 전체 다 사용)
+            const questionLimit = 20;
+            quizList = shuffled.slice(0, questionLimit);
             
+            totalQuizCount = quizList.length;
+            
+            // 안내 문구 설정
+            document.getElementById('quiz-info-text').innerText = `총 ${originalTotal}문제 중 ${totalQuizCount}문제가 무작위로 출제되었습니다.`;
+
+            document.getElementById('total-num').innerText = totalQuizCount;
             document.getElementById('selection-screen').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
+            
+            // 처음으로 버튼 보이기
+            document.getElementById('home-btn').classList.remove('hidden');
+
             showQuestion();
         }
 
         // 3. 퀴즈 진행
         function showQuestion() {
-            if (currentIndex >= quizList.length) { // length로 체크 (데이터가 20개 미만일 경우 대비)
+            if (currentIndex >= quizList.length) {
                 endGame();
                 return;
             }
@@ -531,18 +568,25 @@
         }
 
         function checkAnswer() {
-            const userInput = document.getElementById('answer-input').value.trim().replace(/\s+/g, '');
+            const inputField = document.getElementById('answer-input');
+            const userInput = inputField.value.trim().replace(/\s+/g, '');
             const correctAnswer = quizList[currentIndex].term.replace(/\s+/g, '');
             const msgBox = document.getElementById('result-msg');
 
             if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
+                // 정답 로직
                 msgBox.className = 'correct';
                 msgBox.innerText = '정답입니다.';
                 
+                // 2번 이상 틀리기 전에 맞혀야 점수 인정
+                if (wrongCount < 2) {
+                    correctAnswersCount++; 
+                }
+
                 setTimeout(() => {
                     currentIndex++;
-                    // 마스터 도전 중일 때만 칭찬 팝업 띄움
-                    if (isMasterRun && currentIndex > 0 && currentIndex % 5 === 0 && currentIndex < totalQuizCount) {
+                    // 칭찬 모달 (5문제 단위)
+                    if (currentIndex > 0 && currentIndex % 5 === 0 && currentIndex < totalQuizCount) {
                         showPraiseModal();
                     } else {
                         showQuestion();
@@ -550,23 +594,18 @@
                 }, 1000);
 
             } else {
+                // 오답 로직
                 wrongCount++;
-                totalWrongAttempts++;
                 msgBox.className = 'wrong';
                 
                 if (wrongCount >= 2) {
-                    // [중요] 2회 오답 발생 시 로직
-                    msgBox.innerText = `땡! 정답은 '${quizList[currentIndex].term}' 입니다.`;
-                    isMasterRun = false; // 실패 확정
-
-                    // 2초 뒤에 즉시 게임 종료 (다음 문제로 넘어가지 않음)
-                    setTimeout(() => {
-                        endGame(); 
-                    }, 2000);
-
+                    // 정답을 보여주되, 사용자가 똑같이 입력해야 함.
+                    msgBox.innerHTML = `틀렸습니다.<br>정답은 <b>'${quizList[currentIndex].term}'</b>입니다.<br>위 정답을 입력창에 똑같이 입력해야 넘어갑니다.`;
+                    inputField.value = ''; // 입력창 비움
+                    inputField.focus();    // 포커스
                 } else {
-                    msgBox.innerText = '다시 한 번 생각해보세요.';
-                    document.getElementById('answer-input').select();
+                    msgBox.innerText = '다시 한 번 생각해보세요. (1회 오류)';
+                    inputField.select();
                 }
             }
         }
@@ -575,15 +614,7 @@
         function showPraiseModal() {
             const modal = document.getElementById('praise-modal');
             const praiseText = document.getElementById('praise-text');
-            
-            if (currentIndex === 5) {
-                praiseText.innerHTML = "5문제 돌파!<br>시작이 아주 좋아요!";
-            } else if (currentIndex === 10) {
-                praiseText.innerHTML = "10문제 돌파!<br>절반이나 왔어요!";
-            } else if (currentIndex === 15) {
-                praiseText.innerHTML = "15문제 돌파!<br>조금만 더 힘내세요!";
-            }
-            
+            praiseText.innerHTML = `${currentIndex}문제 돌파!<br>아주 잘하고 있어요!`;
             modal.style.display = "block";
         }
 
@@ -602,32 +633,26 @@
         function endGame() {
             document.getElementById('quiz-area').classList.add('hidden');
             document.getElementById('finish-area').classList.remove('hidden');
+            document.getElementById('home-btn').classList.add('hidden'); // 홈 버튼 숨김
             document.getElementById('progress-bar').style.width = "100%";
 
-            const finalTitle = document.getElementById('final-title');
+            const scoreText = document.getElementById('final-score');
             
-            if (isMasterRun) {
-                // 성공 UI
-                finalTitle.innerText = "축하합니다!";
-                finalTitle.style.color = "#1565c0";
-                document.getElementById('success-content').classList.remove('hidden');
-                document.getElementById('fail-content').classList.add('hidden');
+            // 만점(전체 문제를 스스로 맞힘) 체크
+            if (correctAnswersCount === totalQuizCount) {
+                scoreText.innerText = `${correctAnswersCount} / ${totalQuizCount}`;
+                document.getElementById('badge-area').classList.remove('hidden');
+                document.getElementById('review-msg').classList.add('hidden');
                 
                 const badgeText = document.getElementById('master-badge-text');
-                if (currentGrade === 1) badgeText.innerText = "중1 수학 용어 마스터";
-                else if (currentGrade === 2) badgeText.innerText = "중2 수학 용어 마스터";
-                else badgeText.innerText = "중3 수학 용어 마스터";
-                
+                if (currentGrade === 1) badgeText.innerText = `중1 수학 용어 마스터 '${currentPlayerName}'님`;
+                else if (currentGrade === 2) badgeText.innerText = `중2 수학 용어 마스터 '${currentPlayerName}'님`;
+                else badgeText.innerText = `중3 수학 용어 마스터 '${currentPlayerName}'님`;
             } else {
-                // 실패 UI
-                finalTitle.innerText = "도전 실패...";
-                finalTitle.style.color = "#c62828";
-                document.getElementById('fail-content').classList.remove('hidden');
-                document.getElementById('success-content').classList.add('hidden');
-                
-                // 어느 문제에서 떨어졌는지 표시
-                const failReason = document.getElementById('fail-reason-text');
-                failReason.innerText = `${currentIndex + 1}번 문제에서 오답 2회로 탈락!`;
+                // 만점이 아님: 점수만 표시
+                scoreText.innerText = `${correctAnswersCount} / ${totalQuizCount}`;
+                document.getElementById('badge-area').classList.add('hidden');
+                document.getElementById('review-msg').classList.remove('hidden');
             }
 
             // 구글 시트로 기록 전송
@@ -645,15 +670,8 @@
             else if (currentGrade === 2) gradeText = "2학년";
             else gradeText = "3학년";
             
-            let resultStatus = "";
-            if (isMasterRun) {
-                resultStatus = "마스터 달성";
-            } else {
-                resultStatus = `도전 실패 (${currentIndex + 1}번 문제 탈락)`;
-            }
-            
             // 결과 문자열
-            const finalResult = `${resultStatus}`;
+            const finalResult = `${correctAnswersCount} / ${totalQuizCount}`;
 
             // URL에 grade 파라미터 추가
             const url = `${SCRIPT_URL}?name=${encodeURIComponent(currentPlayerName)}&grade=${encodeURIComponent(gradeText)}&result=${encodeURIComponent(finalResult)}`;
